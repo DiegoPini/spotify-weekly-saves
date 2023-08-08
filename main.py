@@ -11,6 +11,7 @@ load_dotenv()
 client_id = os.getenv("CLIENT_ID")
 client_secret = os.getenv("CLIENT_SECRET")
 user_id = os.getenv("USER_ID")
+weekly_discover = os.getenv("WEEKLY_DISCOVER")
 SCOPE = 'user-library-read playlist-modify-public playlist-modify-private'
 URI = os.getenv("URI")
 
@@ -18,9 +19,9 @@ token = SpotifyOAuth(client_id= client_id, client_secret= client_secret, redirec
 
 spotifyObject = spotipy.Spotify(auth_manager = token) 
 
-def get_tracks_uri():
+def get_tracks_uri(playlist_uri):
     songs_uri = []
-    json_result = spotifyObject.playlist(playlist_id='https://open.spotify.com/playlist/37i9dQZEVXcHRahsteNcM5?si=5e6617a061b34675')
+    json_result = spotifyObject.playlist(playlist_id='https://open.spotify.com/playlist/' + playlist_uri)
     json_lenght = json_result['tracks']['total']
     for i in range(json_lenght):
         songs_uri.append(json_result['tracks']['items'][i]['track']['uri'])
@@ -40,17 +41,15 @@ def add_songs():
         playlist_id = json_result['items'][numPlaylist]['id']
        
 
-    tracks_uri = get_tracks_uri()
+    tracks_uri = get_tracks_uri(playlist_uri=weekly_discover)
     spotifyObject.user_playlist_add_tracks(user = user_id, playlist_id=playlist_id, tracks= tracks_uri)
     remove_duplicates(playlist_id)
 
 def remove_duplicates(playlist_id):
-    tracks_uri = get_tracks_uri()
-    playlist_tracks = []
-    json_result = spotifyObject.playlist(playlist_id= playlist_id)
-    json_lenght = json_result['tracks']['total']
-    for i in range(json_lenght):
-        playlist_tracks.append(json_result['tracks']['items'][i]['track']['uri'])
+
+    tracks_uri = get_tracks_uri(playlist_uri=weekly_discover)
+    playlist_tracks = get_tracks_uri(playlist_uri = playlist_id)
+    
 
     remove_songs = []
     for i in range(len(tracks_uri)):
